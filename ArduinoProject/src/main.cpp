@@ -1,14 +1,20 @@
 #include <Arduino.h>
 #include "Wire.h"
 #include "SHT31.h"
+#include <DigitalFilters.h>
 
 #define SHT31_ADDRESS   0x44
+#define dataSetSize 10
 
 uint32_t start;
 uint32_t stop;
 
 SHT31 sht;
 
+
+DigitalFilters digFilTemp(dataSetSize);
+DigitalFilters digFilHum(dataSetSize);
+bool flag = false;
 
 void setup()
 {
@@ -32,7 +38,20 @@ void loop()
   start = micros();
   sht.read();         // default = true/fast       slow = false
   stop = micros();
-  String json = "{\"temp\":"+(String)sht.getTemperature()+", \"hum\":"+(String)sht.getHumidity()+"}";
+  if (flag == false)
+    {
+      for (int i = 0; i < 10; i++)
+      {
+        digFilHum.AddValue(sht.getHumidity());
+        digFilTemp.AddValue(sht.getTemperature());
+      }
+      flag= true;
+    }
+  float TempMedia = digFilTemp.AverageFilter();
+  float TempExpo = digFilTemp.ExponentialFilter(sht.getTemperature(),0.8);
+  float HumMedia = digFilHum.AverageFilter();
+  float HumExpo = digFilHum.ExponentialFilter(sht.getHumidity(),0.8);
+  String json = "{\"temp\":"+(String)sht.getTemperature()+", \"hum\":"+(String)sht.getHumidity()+", \"AvgTemp\":"+(String)+TempMedia+", \"AvgHum\":"+(String)HumMedia+", \"ExpgHum\":"+(String)HumExpo+", \"ExpTemp\":"+(String)TempExpo+"}";
   Serial.println(json);
   delay(3000);
   }
