@@ -13,7 +13,9 @@ const expressPort = 3000
 
 app.get('/', (req, res) => {
     var csvData=[];
-    fs.createReadStream("/Users/mac/My Drive/Sebastian/Cursos/EAI_IOT/Arquitectura/BackEnd/CSV/teamHum.csv")
+    let windows = "C:\\Users\\SebastianVelez\\Documents\\EIAIoTArquitecturaMicro\\TemperatureIoT\\BackEnd\\CSV\\teamHum.csv";
+    let macOs= "/Users/mac/My Drive/Sebastian/Cursos/EAI_IOT/Arquitectura/BackEnd/CSV/teamHum.csv"
+    fs.createReadStream(windows)
     .pipe(parse({delimiter: ':'}))
     .on('data', function(csvrow) {
         csvData.push(csvrow);        
@@ -21,7 +23,7 @@ app.get('/', (req, res) => {
     .on('end',function() {
       //do something with csvData
       console.log(csvData);
-      res.send(csvData)
+      res.send(JSON.stringify(csvData))
     });
 })
 
@@ -31,15 +33,16 @@ app.listen(expressPort, () => {
 
 // Create a port
 const port = new SerialPort({
-  path: '/dev/tty.usbmodem143301',
+  //path: '/dev/tty.usbmodem143301',
+  path: 'COM3',
   baudRate: 9600,
 })
 
 const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
-const fields = ['temp', 'hum'];
+const fields = ['temp', 'hum', 'AvgTemp', 'AvgHum', 'ExpgHum', 'ExpTemp'];
 
 parser.on('data', function (data) {
-    if(new Blob([data]).size >=27)
+    if(new Blob([data]).size > 27)
     {
         let jsonData = JSON.parse(data)
         console.log(jsonData)
