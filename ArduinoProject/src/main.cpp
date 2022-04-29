@@ -53,7 +53,7 @@ void loop()
   float HumExpo = digFilHum.ExponentialFilter(sht.getHumidity(),0.8);
   String json = "{\"temp\":"+(String)sht.getTemperature()+", \"hum\":"+(String)sht.getHumidity()+", \"AvgTemp\":"+(String)+TempMedia+", \"AvgHum\":"+(String)HumMedia+", \"ExpgHum\":"+(String)HumExpo+", \"ExpTemp\":"+(String)TempExpo+"}";
   Serial.println(json);
-  delay(3000);
+  delay(10000);
   }
 
 
